@@ -1,26 +1,86 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePendingGameDto } from './dto/create-pending-game.dto';
 import { UpdatePendingGameDto } from './dto/update-pending-game.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PendingGame } from './entities/pending-game.entity';
+import { Repository } from 'typeorm';
+import { manageErrors } from 'src/common/errors/custom/err.custom';
 
 @Injectable()
 export class PendingGamesService {
-  create(createPendingGameDto: CreatePendingGameDto) {
-    return 'This action adds a new pendingGame';
+  constructor(
+    @InjectRepository(PendingGame)
+    private pendingGameRepository: Repository<PendingGame>,
+  ) {}
+
+  async create(createPendingGameDto: CreatePendingGameDto) {
+    const data = this.pendingGameRepository.create(createPendingGameDto);
+    await this.pendingGameRepository.save(data);
+    return data;
   }
 
-  findAll() {
-    return `This action returns all pendingGames`;
+  async findAll() {
+    try {
+      const find = await this.pendingGameRepository.find();
+      if (find.length == 0) {
+        throw new manageErrors({
+          type: 'NOT_FOUND',
+          message: 'DOES THERE ARE NOT PENDING GAMES .',
+        });
+      }
+      return find;
+    } catch (err: any) {
+      throw new manageErrors.signatureError(err.message);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pendingGame`;
+  async findOne(id: number) {
+    try {
+      const findOne = await this.pendingGameRepository.findOne({
+        where: { id: id },
+      });
+      if (!findOne) {
+        throw new manageErrors({
+          type: 'NOT_FOUND',
+          message: 'DOES THERE ARE NOT PENDING GAMES .',
+        });
+      }
+      return findOne;
+    } catch (err: any) {
+      throw new manageErrors.signatureError(err.message);
+    }
   }
 
-  update(id: number, updatePendingGameDto: UpdatePendingGameDto) {
-    return `This action updates a #${id} pendingGame`;
+  async update(id: number, updatePendingGameDto: UpdatePendingGameDto) {
+    try {
+      const { affected } = await this.pendingGameRepository.update(
+        id,
+        updatePendingGameDto,
+      );
+      if (affected == 0) {
+        throw new manageErrors({
+          type: 'NOT_FOUND',
+          message: 'FAILED TO UPDATED .',
+        });
+      }
+      return 'Perfectly updated .';
+    } catch (err: any) {
+      throw new manageErrors.signatureError(err.message);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pendingGame`;
+  async remove(id: number) {
+    try {
+      const { affected } = await this.pendingGameRepository.delete(id);
+      if (affected == 0) {
+        throw new manageErrors({
+          type: 'NOT_FOUND',
+          message: 'FAILED TO DELETED .',
+        });
+      }
+      return 'Perfectly deleted .';
+    } catch (err: any) {
+      throw new manageErrors.signatureError(err.message);
+    }
   }
 }
