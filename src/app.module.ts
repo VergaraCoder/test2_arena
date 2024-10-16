@@ -9,9 +9,21 @@ import { AuthModule } from './auth/auth.module';
 import { ResultsModule } from './results/results.module';
 import { UserModule } from './user/user.module';
 import { RoleModule } from './role/role.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CredentialsOrm } from './common/db/config/db.config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useClass: CredentialsOrm,
+    }),
     PlayersModule,
     TournamentsModule,
     TournamentsPlayersModule,
