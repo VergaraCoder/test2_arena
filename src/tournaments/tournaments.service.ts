@@ -1,26 +1,85 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Tournament } from './entities/tournament.entity';
+import { Repository } from 'typeorm';
+import { manageErrors } from 'src/common/errors/custom/err.custom';
 
 @Injectable()
 export class TournamentsService {
-  create(createTournamentDto: CreateTournamentDto) {
-    return 'This action adds a new tournament';
+  constructor(
+    @InjectRepository(Tournament)
+    private tournamentRepository: Repository<Tournament>,
+  ) {}
+  async create(createTournamentDto: CreateTournamentDto) {
+    const data = this.tournamentRepository.create(createTournamentDto);
+    await this.tournamentRepository.save(data);
+    return data;
   }
 
-  findAll() {
-    return `This action returns all tournaments`;
+  async findAll() {
+    try {
+      const find = await this.tournamentRepository.find();
+      if (find.length == 0) {
+        throw new manageErrors({
+          type: 'NOT_FOUND',
+          message: 'DOES THERE ARE NOT TOURNAMENTS .',
+        });
+      }
+      return find;
+    } catch (err: any) {
+      throw manageErrors.signatureError(err.message);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tournament`;
+  async findOne(id: number) {
+    try {
+      const findOne = await this.tournamentRepository.findOne({
+        where: { id: id },
+      });
+      if (!findOne) {
+        throw new manageErrors({
+          type: 'NOT_FOUND',
+          message: 'DOES THERE ARE NOT THAT TOURNAMENT .',
+        });
+      }
+      return findOne;
+    } catch (err: any) {
+      throw manageErrors.signatureError(err.message);
+    }
   }
 
-  update(id: number, updateTournamentDto: UpdateTournamentDto) {
-    return `This action updates a #${id} tournament`;
+  async update(id: number, updateTournamentDto: UpdateTournamentDto) {
+    try {
+      const { affected } = await this.tournamentRepository.update(
+        id,
+        updateTournamentDto,
+      );
+      if (affected == 0) {
+        throw new manageErrors({
+          type: 'NOT_FOUND',
+          message: 'FAILED TO UPDATED .',
+        });
+      }
+      return 'Perfectly updated .';
+    } catch (err: any) {
+      throw manageErrors.signatureError(err.message);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tournament`;
+  async remove(id: number) {
+    try {
+      const { affected } = await this.tournamentRepository.delete(id);
+      if (affected == 0) {
+        throw new manageErrors({
+          type: 'NOT_FOUND',
+          message: 'FAILED TO DELETED .',
+        });
+      }
+      return 'Perfectly deleted .';
+    } catch (err: any) {
+      throw manageErrors.signatureError(err.message);
+    }
   }
 }
