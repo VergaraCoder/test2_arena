@@ -13,12 +13,12 @@ export class errorFilter implements ExceptionFilter {
     const response: Response = host.switchToHttp().getResponse();
 
     const ifExist = exception.message.split(' :: ');
-    const ifExist2 = exception.Response;
+    const ifExist2 = exception.response;
     let message;
     let status;
 
     if (ifExist2 && ifExist2.message) {
-      message = ifExist2.message ? ifExist2.message : ifExist2.error;
+      message = ifExist2 ? ifExist2 : ifExist2.message;
       status = ifExist2.statusCode ? ifExist2.statusCode : 400;
     } else if (ifExist && ifExist.length == 2) {
       message = ifExist[0];
