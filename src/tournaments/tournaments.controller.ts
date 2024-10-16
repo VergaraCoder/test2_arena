@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TournamentsService } from './tournaments.service';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
@@ -8,27 +16,30 @@ export class TournamentsController {
   constructor(private readonly tournamentsService: TournamentsService) {}
 
   @Post()
-  create(@Body() createTournamentDto: CreateTournamentDto) {
+  async create(@Body() createTournamentDto: CreateTournamentDto) {
     return this.tournamentsService.create(createTournamentDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.tournamentsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.tournamentsService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTournamentDto: UpdateTournamentDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateTournamentDto: UpdateTournamentDto,
+  ) {
     return this.tournamentsService.update(+id, updateTournamentDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.tournamentsService.remove(+id);
   }
 }
